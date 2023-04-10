@@ -1,0 +1,39 @@
+version: "3"
+services:
+
+  kafka:
+    image: wurstmeister/kafka
+    networks:
+      - cdc-network
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      HOSTNAME_COMMAND: "route -n | awk '/UG[ \t]/{print $$2}'"
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_LOG_DIRS: /kafka
+      KAFKA_BROKER_ID: 1
+      KAFKA_CREATE_TOPICS: cdc-topic:1:1
+      KAFKA_LOG_RETENTION_HOURS: "168"
+      KAFKA_LOG_RETENTION_BYTES: "100000000"
+      KAFKA_ZOOKEEPER_CONNECT:  zookeeper:2181
+
+  zookeeper:
+    image: elevy/zookeeper:latest
+    networks:
+      - cdc-network
+    environment:
+      MYID: 1
+      SERVERS: zookeeper
+    ports:
+      - "2181:2181"
+      - "2888"
+      - "3888"
+
+networks:
+  cdc-network:
+    driver: bridge
+
+volumes:
+    driver: local
